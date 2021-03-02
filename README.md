@@ -1,4 +1,4 @@
-# BWPlanner
+# BWPlanner ![Build Status](https://api.travis-ci.com/nramon/BWPlanner.svg?branch=main)
 
 BWPlanner is a domain specific planner for the [blocks world](https://en.wikipedia.org/wiki/Blocks_world) domain written for learning purposes.
 
