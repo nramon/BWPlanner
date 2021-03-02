@@ -167,7 +167,7 @@ if "-n" in opts or not "-o" in opts:
     s0 = BlocksWorld(s0_state)
     goal = BlocksWorld(goal_state)
 
-    log("BLOCKSWORLD SOLVER", f"Looking for a valid plan...")
+    log("BLOCKSWORLD SOLVER", "Looking for a valid plan...")
     t0 = datetime.datetime.now()
     plan = AlgorithmicSolver(s0, goal)
     t1 = datetime.datetime.now()
@@ -182,7 +182,7 @@ if "-o" in opts:
     s0 = BlocksWorld(s0_state)
     goal = BlocksWorld(goal_state)
 
-    log("A* SOLVER", f"Looking for an optimal plan...")
+    log("A* SOLVER", "Looking for an optimal plan...")
     t0 = datetime.datetime.now()
     plan = AStarSolver(s0, goal, h=goal.h, prune=BlocksWorld.prune)
     t1 = datetime.datetime.now()
