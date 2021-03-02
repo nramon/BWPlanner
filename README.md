@@ -29,7 +29,7 @@ Find a valid plan for the given problem and then try to find an optimal plan unt
 
 ## Screenshot
 
-![screenshot](https://raw.githubusercontent.com/nramon/BWPlanner/master/doc/bwplanner.png)
+![screenshot](https://raw.githubusercontent.com/nramon/BWPlanner/main/doc/bwplanner.png)
 
 ## Copyright
 
