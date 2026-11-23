@@ -1,4 +1,4 @@
-# BWPlanner ![Build Status](https://api.travis-ci.com/nramon/BWPlanner.svg?branch=main)
+# BWPlanner [![CI](https://github.com/nramon/BWPlanner/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nramon/BWPlanner/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/nramon/BWPlanner/branch/main/graph/badge.svg)](https://codecov.io/gh/nramon/BWPlanner)
 
 BWPlanner is a domain specific planner for the [blocks world](https://en.wikipedia.org/wiki/Blocks_world) domain written for learning purposes.
 
@@ -10,7 +10,16 @@ It does not implement a full PDDL parser. Problems must adhere to [this](http://
 
 BWPlanner requires [Python](https://www.python.org/) version 3.8 or later.
 
+## Installation
+
+Optionally, install BWPlanner to get the `bwplanner` command:
+```
+pip install .
+```
+
 ## Running the planner
+
+The examples below use `./bwplanner.py`, which works without installing anything. Run `bwplanner -h` for all the options.
 
 Find an optimal plan for the given problem:
 ```
@@ -25,6 +34,14 @@ Find a valid plan for the given problem:
 Find a valid plan for the given problem and then try to find an optimal plan until the program is interrupted:
 ```
 ./bwplanner.py -n -o problems/pfile16.pddl
+```
+
+## Development
+
+Install the development dependencies and run the linter and the tests (coverage must stay at 100%):
+```
+pip install -r requirements.txt
+make
 ```
 
 ## Screenshot

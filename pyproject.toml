@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bwplanner"
+dynamic = ["version"]
+description = "A domain specific planner for the blocks world domain."
+readme = "README.md"
+license = {text = "GPL-3.0-or-later"}
+requires-python = ">=3.8"
+authors = [{name = "Ramon Novoa"}]
+
+[project.scripts]
+bwplanner = "bwplanner:main"
+
+[tool.setuptools]
+py-modules = ["bwplanner"]
+packages = ["domain", "solvers"]
+
+[tool.setuptools.dynamic]
+version = {attr = "bwplanner.__version__"}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.coverage.run]
+omit = ["tests/*", "setup.py"]
+
+[tool.coverage.report]
+fail_under = 100

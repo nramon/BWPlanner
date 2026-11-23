@@ -1,10 +1,12 @@
 ################################################################################
 # Makefile for BWPlanner.
 ################################################################################
-.PHONY: all test
+.PHONY: all lint test
 
-all: test
+all: lint test
+
+lint:
+	@pylint -v bwplanner.py domain/ solvers/
 
 test:
-	@pylint -v bwplanner.py domain/ solvers/
-	@pytest --cov-report=xml --cov=. tests/
+	@pytest --cov=. --cov-report=xml --cov-report=term-missing tests/
