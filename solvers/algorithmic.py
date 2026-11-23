@@ -62,6 +62,7 @@ class AlgorithmicSolver(Solver):
                     start.apply(('unstack', top, stack[-2]))
                     self.actions.append(('putdown', top))
                     start.apply(('putdown', top))
+                    subgoals = update_subgoals(start, goal)
                     break
 
     ################################################################################

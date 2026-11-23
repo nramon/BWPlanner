@@ -1,3 +1,4 @@
+import signal
 import unittest
 from domain import BlocksWorld
 from solvers import AlgorithmicSolver, AStarSolver
@@ -48,6 +49,37 @@ class TestDomain(unittest.TestCase):
         stacks = [['a', 'b'], ['c']]
         plan = AlgorithmicSolver(BlocksWorld(stacks), BlocksWorld(stacks))
         self.assertEqual(plan.reconstruct_path(), [])
+
+    def test_algo_no_stale_subgoals(self):
+        """
+        The subgoals must be refreshed after taking a stack apart. With stale
+        subgoals this problem (found by random testing) never finishes.
+        """
+        s0 = [['b22', 'b24', 'b30', 'b8', 'b1', 'b4', 'b19', 'b2', 'b26'],
+              ['b21', 'b7', 'b20', 'b13', 'b5'],
+              ['b17', 'b0', 'b16', 'b36', 'b35', 'b29'], ['b18'], ['b14'],
+              ['b23', 'b32', 'b11'], ['b28', 'b15'], ['b10', 'b33'],
+              ['b3', 'b12', 'b37'], ['b6'], ['b25'], ['b9'], ['b34', 'b31'],
+              ['b27']]
+        goal = [['b9', 'b16', 'b14', 'b20', 'b33', 'b17', 'b10'],
+                ['b30', 'b36', 'b18', 'b27'], ['b2', 'b5', 'b32', 'b1', 'b26'],
+                ['b37', 'b0', 'b11'], ['b13', 'b7'], ['b31'],
+                ['b19', 'b28', 'b29'], ['b8'], ['b22'], ['b24'], ['b6'],
+                ['b25'], ['b35', 'b15', 'b4'], ['b21'], ['b3', 'b12', 'b23'],
+                ['b34']]
+
+        def hung(signum, frame):
+            raise TimeoutError("The solver did not finish.")
+
+        old = signal.signal(signal.SIGALRM, hung)
+        signal.alarm(5)
+        try:
+            path = AlgorithmicSolver(BlocksWorld(s0),
+                                     BlocksWorld(goal)).reconstruct_path()
+        finally:
+            signal.alarm(0)
+            signal.signal(signal.SIGALRM, old)
+        self.assertTrue(plan_reaches_goal(s0, goal, path))
 
     def test_algo_random(self):
         """
