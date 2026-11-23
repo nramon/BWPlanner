@@ -39,7 +39,7 @@ class AStarSolver(Solver):
                  goal,
                  g=lambda x: 1, # Assume an action cost of 1 by default.
                  h=lambda x: 0, # Null heuristic.
-                 prune=lambda x, y: True):
+                 prune=lambda x, y: False):
         """
         AStarSolver constructor. Runs the A* algorithm.
 

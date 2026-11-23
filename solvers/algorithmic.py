@@ -50,6 +50,10 @@ class AlgorithmicSolver(Solver):
             while self.__place_block(start, subgoals):
                 subgoals = update_subgoals(start, goal)
 
+            # Nothing else to do. Do not take apart the finished stacks.
+            if not subgoals:
+                break
+
             # Unstack once and see if we can put more blocks in their final place.
             # Sort the stacks by size in increasing order.
             for top, stack in sorted(start.stacks.items(), key=lambda x: len(x[1])):
