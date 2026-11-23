@@ -72,7 +72,7 @@ class BlocksWorld:
         # Get the action.
         funct = getattr(self, action[0], None)
         if not funct:
-            raise Exception("Invalid action: {}".format(action[0]))
+            raise ValueError(f"Invalid action: {action[0]}")
 
         # Call it.
         funct(*action[1:])
@@ -317,7 +317,7 @@ class BlocksWorld:
         """
 
         # Arm.
-        string = "{{{}}}".format(self.arm)
+        string = f"{{{self.arm}}}"
 
         # Stacks.
         for _, stack in sorted(self.stacks.items(), key=lambda x: x[0]):

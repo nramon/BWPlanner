@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# pylint: disable=C0103
 """
 Domain dependent planner for blocks world problems.
 
@@ -18,8 +17,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
+import argparse
 import datetime
-import getopt
 import re
 import signal
 import sys
@@ -69,7 +68,7 @@ def pddl2arrays(fname):
         return state
 
     # Parse the PDDL file.
-    with open(fname) as f:
+    with open(fname, encoding='utf-8') as f:
         while line := f.readline():
             if re.search(r'\(:goal', line):
 
@@ -102,68 +101,16 @@ def pddl2arrays(fname):
     return (s0_array, goal_array)
 
 ################################################################################
-# def timeout
+# def find_valid_plan
 ################################################################################
-def timeout(signum, frame):
+def find_valid_plan(s0_state, goal_state):
     """
-    Timeout signal handler.
+    Look for a valid (not necessarily optimal) plan.
+
+    :param s0_state:   Array for the initial state.
+    :param goal_state: Array for the goal state.
+    :return:           The plan.
     """
-    log("SYSTEM", "Timed out.")
-    sys.exit(1)
-
-################################################################################
-# Main.
-################################################################################
-
-# Parse command line options.
-opts, args = getopt.gnu_getopt(sys.argv, 'hnot:')
-
-# Configure the timeout.
-for opt, val in opts:
-    if opt == "-t":
-        log("SYSTEM", f"Setting timeout to {val} seconds.")
-        signal.signal(signal.SIGALRM, timeout)
-        signal.alarm(int(val))
-
-# Discard option arguments.
-opts = [o[0] for o in opts]
-
-# Check command line parameters.
-if len(args) != 2 or '-h' in opts:
-    print(f"BWPlanner v{__version__}\n")
-    print(f"Usage: {sys.argv[0]} [options] <PDDL problem file>\n")
-    print("Options:")
-    print("\t-h\t\tPrint this help screen.")
-    print("\t-n\t\tLook for a valid plan (the default behavior).")
-    print("\t-o\t\tLook for an optimal plan.")
-    print("\t-t <timeout>\tTimeout in seconds.\n")
-    print("Options -n and -o can be combined to perform anytime search.\n")
-    sys.exit(1)
-
-# Parse the problem definition files and convert the states to
-# BlocksWorld objects.
-log("PROBLEM PARSER", f"Parsing PDDL file: {args[1]}")
-s0_state, goal_state = pddl2arrays(args[1])
-
-# Sanity check.
-assert sum(len(s) for s in s0_state) == sum(len(s) for s in goal_state)
-
-# Print some problem related stats.
-num_blocks = sum([len(s) for s in s0_state])
-s0_stacks = len(s0_state)
-goal_stacks = len(goal_state)
-upper_lim = 4 * num_blocks - 2 * s0_stacks - 2 * goal_stacks
-
-log("PROBLEM PARSER", f"Number of blocks: {num_blocks}")
-log("PROBLEM PARSER", f"Number of stacks in the initial state: {s0_stacks}")
-log("PROBLEM PARSER", f"Number of stacks in the goal state: {goal_stacks}")
-log("PROBLEM PARSER", f"Upper length limit for an optimal plan: {upper_lim}")
-
-# Save plan paths to perform sanity checks.
-path_o = path_no = None
-
-# Non-optimal plan search.
-if "-n" in opts or not "-o" in opts:
     s0 = BlocksWorld(s0_state)
     goal = BlocksWorld(goal_state)
 
@@ -173,12 +120,22 @@ if "-n" in opts or not "-o" in opts:
     t1 = datetime.datetime.now()
     elapsed = (t1 - t0).total_seconds()
 
-    path_no = plan.reconstruct_path()
-    log("BLOCKSWORLD SOLVER", f"Found a plan in {elapsed} seconds: {path_no}")
-    log("BLOCKSWORLD SOLVER", f"Plan length: {len(path_no)}")
+    path = plan.reconstruct_path()
+    log("BLOCKSWORLD SOLVER", f"Found a plan in {elapsed} seconds: {path}")
+    log("BLOCKSWORLD SOLVER", f"Plan length: {len(path)}")
+    return path
 
-# Optimal plan search.
-if "-o" in opts:
+################################################################################
+# def find_optimal_plan
+################################################################################
+def find_optimal_plan(s0_state, goal_state):
+    """
+    Look for an optimal plan.
+
+    :param s0_state:   Array for the initial state.
+    :param goal_state: Array for the goal state.
+    :return:           The plan.
+    """
     s0 = BlocksWorld(s0_state)
     goal = BlocksWorld(goal_state)
 
@@ -188,13 +145,99 @@ if "-o" in opts:
     t1 = datetime.datetime.now()
     elapsed = (t1 - t0).total_seconds()
 
-    path_o = plan.reconstruct_path()
-    log("A* SOLVER", f"Found an optimal plan in {elapsed} seconds: {path_o}")
+    path = plan.reconstruct_path()
+    log("A* SOLVER", f"Found an optimal plan in {elapsed} seconds: {path}")
     log("A* SOLVER", f"Expanded nodes: {plan.num_expanded()}")
-    log("A* SOLVER", f"Plan length: {len(path_o)}")
+    log("A* SOLVER", f"Plan length: {len(path)}")
+    return path
 
-# Sanity check.
-if path_o and path_no:
-    assert len(path_o) <= len(path_no)
+################################################################################
+# def timeout
+################################################################################
+def timeout(signum, frame): # pylint: disable=unused-argument
+    """
+    Timeout signal handler.
+    """
+    log("SYSTEM", "Timed out.")
+    sys.exit(1)
 
-log("SYSTEM", "Done.")
+################################################################################
+# def parse_args
+################################################################################
+def parse_args(argv):
+    """
+    Parse the command line arguments.
+
+    :param argv: List of command line arguments, without the program name.
+    :return:     The parsed arguments.
+    """
+    parser = argparse.ArgumentParser(
+        prog="bwplanner",
+        description=f"BWPlanner v{__version__}",
+        epilog="Options -n and -o can be combined to perform anytime search.")
+    parser.add_argument("problem", help="PDDL problem file.")
+    parser.add_argument("-n", dest="valid", action="store_true",
+                        help="Look for a valid plan (the default behavior).")
+    parser.add_argument("-o", dest="optimal", action="store_true",
+                        help="Look for an optimal plan.")
+    parser.add_argument("-t", dest="timeout", type=int, metavar="timeout",
+                        help="Timeout in seconds.")
+    return parser.parse_args(argv)
+
+################################################################################
+# def main
+################################################################################
+def main(argv=None):
+    """
+    Entry point.
+
+    :param argv: List of command line arguments, without the program name.
+    :return:     The exit code.
+    """
+    args = parse_args(sys.argv[1:] if argv is None else argv)
+
+    # Configure the timeout.
+    if args.timeout is not None:
+        log("SYSTEM", f"Setting timeout to {args.timeout} seconds.")
+        signal.signal(signal.SIGALRM, timeout)
+        signal.alarm(args.timeout)
+
+    # Parse the problem definition files and convert the states to
+    # BlocksWorld objects.
+    log("PROBLEM PARSER", f"Parsing PDDL file: {args.problem}")
+    s0_state, goal_state = pddl2arrays(args.problem)
+
+    # Sanity check.
+    assert sum(len(s) for s in s0_state) == sum(len(s) for s in goal_state)
+
+    # Print some problem related stats.
+    num_blocks = sum(len(s) for s in s0_state)
+    s0_stacks = len(s0_state)
+    goal_stacks = len(goal_state)
+    upper_lim = 4 * num_blocks - 2 * s0_stacks - 2 * goal_stacks
+
+    log("PROBLEM PARSER", f"Number of blocks: {num_blocks}")
+    log("PROBLEM PARSER", f"Number of stacks in the initial state: {s0_stacks}")
+    log("PROBLEM PARSER", f"Number of stacks in the goal state: {goal_stacks}")
+    log("PROBLEM PARSER", f"Upper length limit for an optimal plan: {upper_lim}")
+
+    # Save plan paths to perform sanity checks.
+    path_o = path_no = None
+
+    # Non-optimal plan search.
+    if args.valid or not args.optimal:
+        path_no = find_valid_plan(s0_state, goal_state)
+
+    # Optimal plan search.
+    if args.optimal:
+        path_o = find_optimal_plan(s0_state, goal_state)
+
+    # Sanity check.
+    if path_o and path_no:
+        assert len(path_o) <= len(path_no)
+
+    log("SYSTEM", "Done.")
+    return 0
+
+if __name__ == "__main__":
+    sys.exit(main())

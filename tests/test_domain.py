@@ -21,7 +21,7 @@ class TestDomain(unittest.TestCase):
         """
         Unknown actions must be rejected.
         """
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             BlocksWorld([[1]]).apply(('jump', 1))
 
     def test_illegal_actions(self):

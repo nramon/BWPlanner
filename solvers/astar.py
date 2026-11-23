@@ -116,7 +116,7 @@ class AStarSolver(Solver):
 
         # Follow the path in reverse order.
         current = self.goal
-        while current in self.came_from.keys():
+        while current in self.came_from:
             current = self.came_from[current]
             total_path.insert(0, current.last_action())
 
