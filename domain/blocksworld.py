@@ -70,7 +70,7 @@ class BlocksWorld:
         """
 
         # Get the action.
-        funct = getattr(self, action[0])
+        funct = getattr(self, action[0], None)
         if not funct:
             raise Exception("Invalid action: {}".format(action[0]))
 
@@ -270,11 +270,12 @@ class BlocksWorld:
     ############################################################################
     def __hash__(self):
         """
-        Use the object's state string representation to generate a hash.
+        Hash the stacks, ignoring their order, so that equal objects have
+        equal hashes.
 
         :return: The hash corresponding to the current object.
         """
-        return hash(str(self.stacks))
+        return hash(frozenset(tuple(s) for s in self.stacks.values()))
 
     ############################################################################
     # def __eq__
