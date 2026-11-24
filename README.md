@@ -1,4 +1,6 @@
-# BWPlanner [![CI](https://github.com/nramon/BWPlanner/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nramon/BWPlanner/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/nramon/BWPlanner/branch/main/graph/badge.svg)](https://codecov.io/gh/nramon/BWPlanner)
+# BWPlanner
+
+[![CI](https://github.com/nramon/BWPlanner/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/nramon/BWPlanner/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/nramon/BWPlanner/branch/main/graph/badge.svg)](https://codecov.io/gh/nramon/BWPlanner)
 
 BWPlanner is a domain specific planner for the [blocks world](https://en.wikipedia.org/wiki/Blocks_world) domain written for learning purposes.
 
